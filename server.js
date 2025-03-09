@@ -117,6 +117,13 @@ app.post('/verify', async (req, res) => {
       });
     }
 
+    // Associar automaticamente se o HWID estiver vazio
+    if (keyData.hwid === '') {
+      keyData.hwid = hashedHwid;
+      await keyData.save();
+    }
+
+    // Verificar correspondência do HWID
     if (keyData.hwid !== hashedHwid) {
       return res.status(403).json({ 
         valid: false, 
@@ -142,7 +149,8 @@ app.post('/verify', async (req, res) => {
       valid: true,
       type: keyData.type,
       expires: keyData.expires,
-      remaining: Math.ceil((keyData.expires - Date.now()) / (1000 * 60 * 60)) + ' horas'
+      remaining: Math.ceil((keyData.expires - Date.now()) / (1000 * 60 * 60)) + ' horas',
+      hwid: keyData.hwid
     });
 
   } catch (error) {
